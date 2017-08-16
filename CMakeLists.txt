@@ -13,17 +13,23 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_CXX_COMPILER_ID}" MATCH
     set(CMAKE_CXX_FLAGS "-Wall ${CMAKE_CXX_FLAGS}")
 endif()
 
-add_library(spdlog INTERFACE)
+file( GLOB_RECURSE SOURCE_FILES include/*.cpp include/*.h )
+
+add_library(spdlog ${SOURCE_FILES})
+
+target_link_libraries(
+    ${PROJECT_NAME}
+    fmt
+    )
+
+target_include_directories( 
+    ${PROJECT_NAME}
+	PUBLIC ${PROJECT_SOURCE_DIR}/include
+    PUBLIC ${fmt_INCLUDE_DIRS}
+    )
 
 option(SPDLOG_BUILD_EXAMPLES "Build examples" OFF)
 option(SPDLOG_BUILD_TESTING "Build spdlog tests" ON)
-
-target_include_directories(
-    spdlog
-    INTERFACE
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
-    "$<INSTALL_INTERFACE:include>"
-)
 
 set(HEADER_BASE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
@@ -35,3 +41,8 @@ if(SPDLOG_BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
+set(
+    ${PROJECT_NAME}_INCLUDE_DIRS
+    ${fmt_INCLUDE_DIRS}
+    CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE
+    )
