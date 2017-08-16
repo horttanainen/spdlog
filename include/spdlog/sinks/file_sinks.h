@@ -193,16 +193,19 @@ public:
         if (rotation_hour < 0 || rotation_hour > 23 || rotation_minute < 0 || rotation_minute > 59)
             throw spdlog_ex("daily_file_sink: Invalid rotation time in ctor");
         _rotation_tp = _next_rotation_tp();
-        _file_helper.open(FileNameCalc::calc_filename(_base_filename));
+		_current_filename = FileNameCalc::calc_filename(_base_filename);
+        _file_helper.open(_current_filename);
     }
 
+	filename_t current_filename() const override { return _current_filename;}
 
 protected:
     void _sink_it(const details::log_msg& msg) override
     {
         if (std::chrono::system_clock::now() >= _rotation_tp)
         {
-            _file_helper.open(FileNameCalc::calc_filename(_base_filename));
+			_current_filename = FileNameCalc::calc_filename(_base_filename);
+			_file_helper.open(_current_filename);
             _rotation_tp = _next_rotation_tp();
         }
         _file_helper.write(msg);
@@ -230,6 +233,7 @@ private:
     }
 
     filename_t _base_filename;
+	filename_t _current_filename;
     int _rotation_h;
     int _rotation_m;
     std::chrono::system_clock::time_point _rotation_tp;

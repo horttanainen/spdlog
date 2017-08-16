@@ -107,6 +107,18 @@ public:
     virtual void set_error_handler(log_err_handler);
     virtual log_err_handler error_handler();
 
+	filename_t current_filename() const 
+	{ 
+		for(const auto &sinkObject : _sinks)
+		{
+			auto currentFilename = sinkObject->current_filename();
+			if(!currentFilename.empty())
+				return currentFilename;
+			
+		}
+		return "";
+	}
+
 protected:
     virtual void _sink_it(details::log_msg&);
     virtual void _set_pattern(const std::string&, pattern_time_type);
